@@ -1,22 +1,21 @@
-import { Reducer } from 'redux';
-import { Currency } from '../../types';
+import { ActionType, createReducer } from 'typesafe-actions';
+
+import { Wallet } from '../../types';
+import * as walletsActions from './actions';
 
 export interface WalletState {
     items: Wallet[]
-}
-
-interface Wallet {
-    id: string;
-    amount: number;
-    currency: Currency;
 }
 
 const initialState: WalletState = {
     items: []
 };
 
-type WalletsReducer = Reducer<WalletState>;
+type WalletsAction = ActionType<typeof walletsActions>;
 
-export const walletsReducer: WalletsReducer = (state = initialState) => {
-    return state;
-};
+export const walletsReducer = createReducer<WalletState, WalletsAction>(initialState)
+    .handleAction(walletsActions.fetchWalletsAsync.success, (state, action) => {
+        return {
+            items: action.payload
+        };
+    });

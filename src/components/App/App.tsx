@@ -1,17 +1,36 @@
 import * as React from "react";
 
+import { appConnector } from "./connectors";
+import { Wallet } from "../../types";
+
 import './App.scss';
 
 interface AppProps {
     title: string;
+
+    wallets: Wallet[];
+    fetchWallets: () => void;
 }
 
-export const App = (props: AppProps) => {
-    const currencies = new Set(['GBP', 'USD', 'EUR']);
+const AppBase = (props: AppProps) => {
+    const { title, wallets, fetchWallets } = props;
+
+    React.useEffect(() => {
+        fetchWallets();
+    });
+
     return (
         <div>
-            {props.title}
-            {[...currencies].map(curr => curr)}
+            {title}
+            {wallets.map(wallet => (
+                <div>
+                    <span>wallet: {wallet.id} --- </span>
+                    <span>amount: {wallet.amount}{wallet.currency}</span>
+                    <br />
+                </div>
+            ))}
         </div>
     );
 };
+
+export const App = appConnector(AppBase);
