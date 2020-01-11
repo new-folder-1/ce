@@ -7,8 +7,8 @@ import { getWallets } from "../../../store/wallets/selectors";
 const mapStateToProps = (state: RootState) => {
     return {
         wallets: getWallets(state)
-    }
-}
+    };
+};
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
     return {

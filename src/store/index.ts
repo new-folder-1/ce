@@ -4,19 +4,17 @@ import createSagaMiddleware from 'redux-saga';
 import { all } from 'redux-saga/effects';
 
 import { WalletState, walletsReducer } from "./wallets/reducer";
-import { ExchangeState, exchangeReducer } from "./exchange/reducer";
 import { RatesState, ratesReducer } from "./rates/reducer";
 import { walletsSaga } from "./wallets/saga";
+import { ratesSaga } from "./rates/saga";
 
 export interface RootState {
     wallets: WalletState;
-    exchange: ExchangeState;
     rates: RatesState;
 }
 
 const rootReducers = combineReducers<RootState>({
     wallets: walletsReducer,
-    exchange: exchangeReducer,
     rates: ratesReducer
 });
 
@@ -31,7 +29,8 @@ export const store = createStore(
 
 const rootSaga = function*() {
     yield all([
-        walletsSaga()
+        walletsSaga(),
+        ratesSaga()
     ]);
 }
 

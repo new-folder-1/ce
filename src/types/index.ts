@@ -5,3 +5,5 @@ export interface Wallet {
     amount: number;
     currency: Currency;
 }
+
+export type ExchangeRates = Record<Currency, Record<Currency, number>>;

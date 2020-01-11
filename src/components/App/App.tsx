@@ -12,25 +12,26 @@ interface AppProps {
     fetchWallets: () => void;
 }
 
-const AppBase = (props: AppProps) => {
-    const { title, wallets, fetchWallets } = props;
+class AppPresenter extends React.Component<AppProps> {
+    componentDidMount() {
+        this.props.fetchWallets();
+    }
+    
+    render() {
+        const { title, wallets } = this.props;
+        return (
+            <div>
+                {title}
+                {wallets.map(wallet => (
+                    <div>
+                        <span>wallet: {wallet.id} --- </span>
+                        <span>amount: {wallet.amount}{wallet.currency}</span>
+                        <br />
+                    </div>
+                ))}
+            </div>
+        );
+    }
+}
 
-    React.useEffect(() => {
-        fetchWallets();
-    });
-
-    return (
-        <div>
-            {title}
-            {wallets.map(wallet => (
-                <div>
-                    <span>wallet: {wallet.id} --- </span>
-                    <span>amount: {wallet.amount}{wallet.currency}</span>
-                    <br />
-                </div>
-            ))}
-        </div>
-    );
-};
-
-export const App = appConnector(AppBase);
+export const App = appConnector(AppPresenter);
