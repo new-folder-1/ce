@@ -14,8 +14,12 @@ const initialState: WalletState = {
 type WalletsAction = ActionType<typeof walletsActions>;
 
 export const walletsReducer = createReducer<WalletState, WalletsAction>(initialState)
-    .handleAction(walletsActions.fetchWalletsAsync.success, (state, action) => {
+    .handleAction([
+        walletsActions.fetchWalletsAsync.success,
+        walletsActions.submitExchangeAsync.success
+    ], (state, action) => {
         return {
+            ...state,
             items: action.payload
         };
     });

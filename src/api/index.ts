@@ -1,4 +1,5 @@
 import { Currency, Wallet, ExchangeRates } from "../types";
+import { ExchangeSubmit } from "../store/wallets/actions";
 
 // todo
 const OPENEXCHANGE_APP_ID = 'b15747ffa53d439e913dc56a5e8c8fb0';
@@ -24,6 +25,14 @@ const mockRatesResponse: Record<Currency, RatesResponse> = {
             "EUR": 1,
             "GBP": 0.765404/0.8992,
             "USD": 1/0.8992
+        }
+    },
+    GBP: {
+        "base": "GBP",
+        "rates": {
+            "EUR": 0.8992/0.765404,
+            "GBP": 1,
+            "USD": 1/0.765404
         }
     }
 };
@@ -68,4 +77,20 @@ const mockWallets: Wallet[] = [
 
 export const getWallets = (): Promise<Wallet[]> => {
     return Promise.resolve(mockWallets);
+};
+
+export const submitExchange = (wallets: Wallet[], data: ExchangeSubmit) => {
+    return Promise.resolve(calculateExchange(wallets, data));
+};
+
+const calculateExchange = (wallets: Wallet[], data: ExchangeSubmit): Wallet[] => {
+    return wallets.map(wallet => {
+        if (wallet.id === data.walletFromId) {
+            wallet.amount -= data.amount;
+        }
+        if (wallet.id === data.walletToId) {
+            wallet.amount += data.amount * data.rate
+        }
+        return wallet;
+    });
 };

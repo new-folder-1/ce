@@ -10,6 +10,7 @@ function* fetchRates(action: ActionType<typeof ratesActions.fetchRates.request>)
         const rates = yield call(getRates, action.payload);
         yield put(ratesActions.fetchRates.success(rates));
     } catch (e) {
+        console.error(e);
         yield put(ratesActions.fetchRates.failure(e));
     }
 }
