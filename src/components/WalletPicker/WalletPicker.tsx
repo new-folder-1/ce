@@ -2,6 +2,8 @@ import * as React from 'react';
 
 import { Wallet, Currency } from "../../types";
 
+import './WalletPicker.scss';
+
 interface WalletPickerProps {
     type: WalletType;
 
@@ -14,7 +16,7 @@ interface WalletPickerProps {
     exchangeCurrency: Currency;
 
     walletsAmount: number;
-    onBallanceChange: (type: WalletType, value: string) => void;
+    onBalanceChange: (type: WalletType, value: string) => void;
     onWalletChange: (type: WalletType, walletIndex: number) => void;
 }
 
@@ -24,7 +26,7 @@ export const isNumber = (value: string) => /^[0-9]*[.]{0,1}[0-9]{0,2}$/.test(val
 
 export const WalletPicker = ({
     type,
-    onBallanceChange,
+    onBalanceChange,
     onWalletChange,
     current,
     currentIndex,
@@ -34,11 +36,10 @@ export const WalletPicker = ({
     amount
 }: WalletPickerProps) => {
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(isNumber(e.target.value));
         if (!isNumber(e.target.value)) {
             return;
         }
-        onBallanceChange(type, e.target.value);
+        onBalanceChange(type, e.target.value);
     }
     const onPrevClick = () => {
         onWalletChange(type, currentIndex === 0 ? 0 : currentIndex - 1);
@@ -46,21 +47,27 @@ export const WalletPicker = ({
     const onNextClick = () => {
         onWalletChange(type, currentIndex === walletsAmount - 1 ? currentIndex : currentIndex + 1);
     }
-    console.log(type, amount);
+
     return (
-        <div>
-            <h4>{current.currency}</h4>
-            <span>You have: {current.currency} {current.amount}</span>
-            <input onChange={onChange} value={+amount.toFixed(5)} />
-            {type === 'to' && (
-                <div>
-                    {current.currency}1 = {exchangeCurrency}{Number(rate.toFixed(5))}
-                </div>
-            )}
+        <section className="WalletPicker">
+            <div className="WalletPicker-Row">
+                <header className="WalletPicker-Currency">
+                    {current.currency}
+                </header>
+                <input className="WalletPicker-Input" onChange={onChange} value={+amount.toFixed(5)} />
+            </div>
+            <div className="WalletPicker-Row">
+                <span className="WalletPicker-Balance">You have: {current.currency} {current.amount}</span>
+                {type === 'to' && (
+                    <span className="WalletPicker-Rate">
+                        {current.currency}1 = {exchangeCurrency}{Number(rate.toFixed(5))}
+                    </span>
+                )}
+            </div>
             <div>
                 <button onClick={onPrevClick}>Prev</button>
                 <button onClick={onNextClick}>Next</button>
             </div>
-        </div>
+        </section>
     );
 };

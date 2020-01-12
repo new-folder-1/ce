@@ -89,7 +89,7 @@ const calculateExchange = (wallets: Wallet[], data: ExchangeSubmit): Wallet[] =>
             wallet.amount -= data.amount;
         }
         if (wallet.id === data.walletToId) {
-            wallet.amount += data.amount * data.rate
+            wallet.amount += Number((data.amount * data.rate).toFixed(2));
         }
         return wallet;
     });

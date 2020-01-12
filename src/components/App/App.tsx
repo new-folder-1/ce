@@ -32,7 +32,7 @@ class AppPresenter extends React.Component<AppProps, AppState> {
             amount: 0
         };
 
-        this.onBallanceChange = this.onBallanceChange.bind(this);
+        this.onBalanceChange = this.onBalanceChange.bind(this);
         this.onWalletChange = this.onWalletChange.bind(this);
         this.submitExchange = this.submitExchange.bind(this);
     }
@@ -66,48 +66,56 @@ class AppPresenter extends React.Component<AppProps, AppState> {
         const rateFrom = rates[walletFrom.currency][walletTo.currency];
         const rateTo = 1 / rateFrom;
 
-        const amountTo = amount * rateFrom;
+        const amountTo = +(amount * rateFrom).toFixed(2);
 
         return (
-            <div>
-                <div>
-                    <button onClick={this.submitExchange}>Exchange</button>
+            <div className="App">
+                <div className="App-Header">
+                    <button
+                        className="App-Submit"
+                        onClick={this.submitExchange}
+                    >
+                        Exchange
+                    </button>
                 </div>
-                <WalletPicker
-                    type="from"
-                    current={walletFrom}
-                    currentIndex={walletFromIndex}
-                    onWalletChange={this.onWalletChange}
-                    onBallanceChange={this.onBallanceChange}
-                    walletsAmount={wallets.length}
-                    rate={rateFrom}
-                    exchangeCurrency={walletTo.currency}
-                    amount={amount}
-                />
-                <hr />
-                <WalletPicker
-                    type="to"
-                    current={walletTo}
-                    currentIndex={walletToIndex}
-                    onBallanceChange={this.onBallanceChange}
-                    onWalletChange={this.onWalletChange}
-                    walletsAmount={wallets.length}
-                    rate={rateTo}
-                    exchangeCurrency={walletFrom.currency}
-                    amount={amountTo}
-                />
+                <div className="App-Wallet App-Wallet_from">
+                    <WalletPicker
+                        type="from"
+                        current={walletFrom}
+                        currentIndex={walletFromIndex}
+                        onWalletChange={this.onWalletChange}
+                        onBalanceChange={this.onBalanceChange}
+                        walletsAmount={wallets.length}
+                        rate={rateFrom}
+                        exchangeCurrency={walletTo.currency}
+                        amount={amount}
+                    />
+                </div>
+                <div className="App-Wallet App-Wallet_to">
+                    <WalletPicker
+                        type="to"
+                        current={walletTo}
+                        currentIndex={walletToIndex}
+                        onBalanceChange={this.onBalanceChange}
+                        onWalletChange={this.onWalletChange}
+                        walletsAmount={wallets.length}
+                        rate={rateTo}
+                        exchangeCurrency={walletFrom.currency}
+                        amount={amountTo}
+                    />
+                </div>
             </div>
         );
     }
 
-    onBallanceChange(type: WalletType, value: string) {
+    onBalanceChange(type: WalletType, value: string) {
         const rateFrom = this.props.rates[this.state.walletFrom.currency][this.state.walletTo.currency];
         const rateTo = 1 / rateFrom;
         type === 'from' && this.setState({
             amount: Number(value)
         });
         type === 'to' && this.setState({
-            amount: Number(value) * rateTo
+            amount: Number((Number(value) * rateTo).toFixed(2))
         });
     }
 
