@@ -1,34 +1,28 @@
 body {
     font-family: 'Roboto', sans-serif;
-    margin: 0;
+    background-color: #2196f3;
+
+    display: flex;
+    justify-content: center;
 }
 
 .App {
-    background-color: #2c6cff;
+    margin: 12px;
+    box-sizing: border-box;
+
     &-Header {
         display: flex;
         justify-content: flex-end;
-        padding: 12px 24px;
-    }
-
-    &-Submit {
-        height: 30px;
-        border: none;
-        border-radius: 2px;
-        color: #fff;
-        background-color: #255dd3;
-        font-weight: bold;
+        padding: 12px 0;
     }
 
     &-Wallet {
         position: relative;
+        padding: 24px;
 
-        &_to {
-            padding: 24px;
-            background-color: #255dd3;
-        }
         &_from {
-            padding: 0 24px 24px;
+            padding: 24px;
+            background-color: #2c6cff;
 
             &::before {
                 content: "";
@@ -40,6 +34,10 @@ body {
                 z-index: 1;
                 transform: translateX(-50%);
             }
+        }
+
+        &_to {            
+            background-color: #255dd3;
         }
     }
 }

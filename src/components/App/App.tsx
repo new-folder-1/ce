@@ -1,27 +1,31 @@
 import * as React from "react";
+import { boundMethod } from 'autobind-decorator';
 
 import { appConnector } from "./connectors";
-import { Wallet, ExchangeRates, Currency } from "../../types";
+import { Wallet, Currency } from "../../types";
+import { WalletPicker, WalletType, DirectionType } from "../WalletPicker/WalletPicker";
+import { Button } from '../Button/Button';
+import { ExchangeSubmit } from "../../store/wallets/actions";
+import { formatNumber } from "../../utils";
 
 import './App.scss';
-import { WalletPicker, WalletType } from "../WalletPicker/WalletPicker";
-import { ExchangeSubmit } from "../../store/wallets/actions";
 
 interface AppProps {
-    title: string;
-
-    rates: ExchangeRates,
+    rates: Record<Currency, number>,
     wallets: Wallet[];
     fetchWallets: () => void;
     updateBaseCurrency: (currency: Currency) => void;
     submitExchange: (data: ExchangeSubmit) => void;
 }
 
-interface AppState {
-    walletFrom?: Wallet;
-    walletTo?: Wallet;
+type AppState = {
+    walletFromIndex: number;
+    walletToIndex: number;
+} & AppAmounts
 
-    amount: number;
+interface AppAmounts {
+    amountFrom?: number;
+    amountTo?: number;
 }
 
 class AppPresenter extends React.Component<AppProps, AppState> {
@@ -29,76 +33,92 @@ class AppPresenter extends React.Component<AppProps, AppState> {
         super(props);
 
         this.state = {
-            amount: 0
+            walletFromIndex: 0,
+            walletToIndex: 1,
         };
+    }
 
-        this.onBalanceChange = this.onBalanceChange.bind(this);
-        this.onWalletChange = this.onWalletChange.bind(this);
-        this.submitExchange = this.submitExchange.bind(this);
+    get walletFrom(): Wallet | undefined {
+        return this.props.wallets[this.state.walletFromIndex];
+    }
+    get walletTo(): Wallet | undefined {
+        return this.props.wallets[this.state.walletToIndex];
+    }
+    get rateFrom(): number | null {
+        const { props: { rates }, walletFrom, walletTo} = this;
+        if (!rates || !walletFrom || !walletTo) {
+            return null;
+        }
+        return rates[walletTo.currency];
+    }
+    get rateTo(): number | null {
+        if (!this.rateFrom) {
+            return null;
+        }
+        return 1 / this.rateFrom;
     }
 
     componentDidMount() {
         this.props.fetchWallets();
     }
 
-    componentDidUpdate() {
-        if (!this.state.walletFrom && !this.state.walletTo) {
+    componentDidUpdate(prevProps: AppProps) {
+        // deepEqual
+        if (prevProps.rates !== this.props.rates) {
             this.setState({
-                walletFrom: this.props.wallets[0],
-                walletTo: this.props.wallets[1]
+                ...this.recalculateMoney('from', this.state.amountFrom)
             });
         }
     }
     
     render() {
-        const { wallets, rates } = this.props;
-        const { walletFrom, walletTo, amount } = this.state;
-        if (!walletFrom && !walletTo) {
-            return <span>Loading wallets...</span>;
+        const { wallets } = this.props;
+        const { walletFromIndex, walletToIndex, amountFrom, amountTo } = this.state;
+        const { walletFrom, walletTo, rateFrom, rateTo } = this;
+
+        if (wallets.length === 0) {
+            return <span>Wallets were not found</span>;
         }
-        if (!(rates && rates[walletFrom.currency])) {
+
+        if (!rateFrom) {
             return <span>Loading rates...</span>;
         }
-
-        const walletFromIndex = wallets.findIndex(w => w.id === walletFrom.id);
-        const walletToIndex = wallets.findIndex(w => w.id === walletTo.id);
-
-        const rateFrom = rates[walletFrom.currency][walletTo.currency];
-        const rateTo = 1 / rateFrom;
-
-        const amountTo = +(amount * rateFrom).toFixed(2);
 
         return (
             <div className="App">
                 <div className="App-Header">
-                    <button
-                        className="App-Submit"
+                    <Button
+                        text="Exchange"
                         onClick={this.submitExchange}
-                    >
-                        Exchange
-                    </button>
+                        disabled={this.isSubmitDisabled()}
+                        theme="action"
+                    />
                 </div>
                 <div className="App-Wallet App-Wallet_from">
                     <WalletPicker
                         type="from"
+                        prev={wallets[walletFromIndex - 1]}
                         current={walletFrom}
-                        currentIndex={walletFromIndex}
-                        onWalletChange={this.onWalletChange}
-                        onBalanceChange={this.onBalanceChange}
-                        walletsAmount={wallets.length}
+                        next={wallets[walletFromIndex + 1]}
+
+                        onWalletChange={this.onWalletFromChange}
+                        onAmountChange={this.onAmountChange}
+                        
                         rate={rateFrom}
                         exchangeCurrency={walletTo.currency}
-                        amount={amount}
+                        amount={amountFrom}
                     />
                 </div>
                 <div className="App-Wallet App-Wallet_to">
                     <WalletPicker
                         type="to"
+                        prev={wallets[walletToIndex - 1]}
                         current={walletTo}
-                        currentIndex={walletToIndex}
-                        onBalanceChange={this.onBalanceChange}
-                        onWalletChange={this.onWalletChange}
-                        walletsAmount={wallets.length}
+                        next={wallets[walletToIndex + 1]}
+
+                        onAmountChange={this.onAmountChange}
+                        onWalletChange={this.onWalletToChange}
+
                         rate={rateTo}
                         exchangeCurrency={walletFrom.currency}
                         amount={amountTo}
@@ -108,32 +128,75 @@ class AppPresenter extends React.Component<AppProps, AppState> {
         );
     }
 
-    onBalanceChange(type: WalletType, value: string) {
-        const rateFrom = this.props.rates[this.state.walletFrom.currency][this.state.walletTo.currency];
-        const rateTo = 1 / rateFrom;
-        type === 'from' && this.setState({
-            amount: Number(value)
-        });
-        type === 'to' && this.setState({
-            amount: Number((Number(value) * rateTo).toFixed(2))
-        });
+    recalculateMoney(type: WalletType, amount: number): AppAmounts {
+        let amountFrom: number;
+        let amountTo: number;
+        const currentBalance = this.walletFrom.amount;
+
+        if (type === 'from') {
+            amountFrom = amount > currentBalance ? currentBalance : amount;
+            amountTo = formatNumber(amountFrom * this.rateFrom);
+        } else if (type === 'to') {
+            const tmpAmountFrom = formatNumber(amount * this.rateTo);
+            const isNotEnoughBalance = tmpAmountFrom > currentBalance;
+            amountFrom = isNotEnoughBalance ? currentBalance : tmpAmountFrom;
+            amountTo = isNotEnoughBalance ? formatNumber(amountFrom * this.rateFrom) : amount; 
+        } else {
+            throw new Error(`${type} is not found`);
+        }
+
+        return { amountFrom, amountTo };
     }
 
-    onWalletChange(type: WalletType, index: number) {
+    @boundMethod
+    onAmountChange(type: WalletType, value: number) {
         this.setState({
-            walletFrom: type === 'from' ? this.props.wallets[index] : this.state.walletFrom,
-            walletTo: type === 'to' ? this.props.wallets[index] : this.state.walletTo
-        }, () => {
-            type === 'from' && this.props.updateBaseCurrency(this.state.walletFrom.currency);
+            ...this.recalculateMoney(type, value)
         });
     }
 
+    @boundMethod
+    onWalletFromChange(direction: DirectionType) {
+        this.setState({
+            walletFromIndex: this.getNewWalletIndex('from', direction)
+        }, () => {
+            this.setState({
+                ...this.recalculateMoney('from', this.state.amountFrom)
+            });
+            this.props.updateBaseCurrency(this.walletFrom.currency);
+        });
+    }
+
+    @boundMethod
+    onWalletToChange(direction: DirectionType) {
+        this.setState({
+            walletToIndex: this.getNewWalletIndex('to', direction)
+        }, () => {
+            this.setState({
+                ...this.recalculateMoney('to', this.state.amountTo)
+            });
+        });
+    }
+
+    getNewWalletIndex(walletType: WalletType, direction: DirectionType) {
+        const currentIndex = walletType === 'from' ? this.state.walletFromIndex : this.state.walletToIndex;
+        return direction === 'prev' ? currentIndex - 1 : currentIndex + 1;
+    }
+
+    isSubmitDisabled() {
+        const { amountFrom } = this.state;
+        return this.walletFrom.id === this.walletTo.id ||
+            !amountFrom || amountFrom > this.walletFrom.amount ||
+            amountFrom < 1;
+    }
+
+    @boundMethod
     submitExchange() {
         this.props.submitExchange({
-            walletFromId: this.state!.walletFrom.id,
-            walletToId: this.state!.walletTo.id,
-            amount: this.state.amount,
-            rate: this.props.rates[this.state.walletFrom.currency][this.state.walletTo.currency]
+            walletFromId: this.walletFrom.id,
+            walletToId: this.walletTo.id,
+            amount: this.state.amountFrom,
+            rate: this.rateFrom
         });
     }
 }

@@ -2,7 +2,7 @@ import { call, select, put, takeLatest, takeEvery, take, race, delay } from 'red
 import { ActionType, getType } from 'typesafe-actions';
 
 import * as ratesActions from './actions';
-import { getRates } from '../../api/';
+import { getRates } from '../../api/rates';
 import { Currency } from '../../types';
 
 function* fetchRates(action: ActionType<typeof ratesActions.fetchRates.request>) {
@@ -24,6 +24,7 @@ function* startPollingRates() {
             yield put(ratesActions.fetchRates.request(currentBaseCurrency));
             yield delay(POLLING_PERIOD);
         } catch (e) {
+            console.error(e);
             yield put(ratesActions.stopPollingRates());
         }
     }

@@ -1,52 +1,50 @@
 import * as React from 'react';
 
-import { Wallet, Currency } from "../../types";
+import { Wallet, Currency } from '../../types';
+import { Button } from '../Button/Button';
 
 import './WalletPicker.scss';
+import { MoneyInput, MoneyInputProps } from '../MoneyInput/MoneyInput';
+import { Money } from '../Money/Money';
 
 interface WalletPickerProps {
     type: WalletType;
 
+    prev: Wallet;
     current: Wallet;
-    currentIndex: number;
+    next: Wallet;
 
     amount: number;
 
     rate: number;
     exchangeCurrency: Currency;
 
-    walletsAmount: number;
-    onBalanceChange: (type: WalletType, value: string) => void;
-    onWalletChange: (type: WalletType, walletIndex: number) => void;
+    onAmountChange: (type: WalletType, value: number) => void;
+    onWalletChange: (direction: DirectionType) => void;
 }
 
 export type WalletType = 'from' | 'to';
-
-export const isNumber = (value: string) => /^[0-9]*[.]{0,1}[0-9]{0,2}$/.test(value);
+export type DirectionType = 'prev' | 'next';
 
 export const WalletPicker = ({
     type,
-    onBalanceChange,
+    onAmountChange,
     onWalletChange,
+    prev,
     current,
-    currentIndex,
-    walletsAmount,
+    next,
     rate,
     exchangeCurrency,
     amount
 }: WalletPickerProps) => {
-    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (!isNumber(e.target.value)) {
-            return;
-        }
-        onBalanceChange(type, e.target.value);
-    }
-    const onPrevClick = () => {
-        onWalletChange(type, currentIndex === 0 ? 0 : currentIndex - 1);
-    }
-    const onNextClick = () => {
-        onWalletChange(type, currentIndex === walletsAmount - 1 ? currentIndex : currentIndex + 1);
-    }
+    const onMoneyInputChange = React.useCallback((value: number) => {
+        onAmountChange(type, value);
+    }, [type, onAmountChange]);
+
+    const onPrevClick = React.useCallback(() => onWalletChange('prev'), [onWalletChange]);
+    const onNextClick = React.useCallback(() => onWalletChange('next'), [onWalletChange]);
+
+    const prefix: MoneyInputProps['prefix'] = amount === 0 ? '' : type === 'from' ? '-' : '+';
 
     return (
         <section className="WalletPicker">
@@ -54,19 +52,31 @@ export const WalletPicker = ({
                 <header className="WalletPicker-Currency">
                     {current.currency}
                 </header>
-                <input className="WalletPicker-Input" onChange={onChange} value={+amount.toFixed(5)} />
+                <MoneyInput
+                    amount={amount}
+                    prefix={prefix}
+                    autofocus={type === 'from'}
+                    onChange={onMoneyInputChange}
+                />
             </div>
             <div className="WalletPicker-Row">
-                <span className="WalletPicker-Balance">You have: {current.currency} {current.amount}</span>
-                {type === 'to' && (
-                    <span className="WalletPicker-Rate">
-                        {current.currency}1 = {exchangeCurrency}{Number(rate.toFixed(5))}
-                    </span>
-                )}
+                <span className="WalletPicker-Balance">
+                    You have: <Money amount={current.amount} currency={current.currency} />
+                </span>
+                <span className="WalletPicker-Rate">
+                    <Money amount={1} currency={current.currency} />&nbsp;=&nbsp;
+                    <Money amount={rate} currency={exchangeCurrency} />
+                </span>
             </div>
-            <div>
-                <button onClick={onPrevClick}>Prev</button>
-                <button onClick={onNextClick}>Next</button>
+            {type === 'from' && amount > current.amount && (
+                <div className="WalletPicker-Row">
+                    <span className="WalletPicker-Warning">You don't have enough money</span>
+                </div>
+            )}
+            <div className="WalletPicker-Row WalletPicker-WalletChanger">
+                {prev && <Button onClick={onPrevClick} text={`← ${prev.currency}`} />}
+                <span>&nbsp;</span>
+                {next && <Button onClick={onNextClick} text={`${next.currency} →`} />}
             </div>
         </section>
     );

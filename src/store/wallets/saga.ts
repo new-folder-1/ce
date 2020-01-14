@@ -1,10 +1,11 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
+import { ActionType } from 'typesafe-actions';
 
 import { fetchWalletsAsync, submitExchangeAsync } from './actions';
-import { getWallets, submitExchange } from '../../api/';
+import { getWallets } from '../../api/wallets';
+import { submitExchange } from '../../api/exchange';
 import { Wallet } from '../../types';
 import { updateBaseCurrency, startPollingRates } from '../rates/actions';
-import { ActionType } from 'typesafe-actions';
 
 function* fetchWallets() {
     try {
