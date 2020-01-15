@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MoneyInput adds prefix when input changes 1`] = `
+<input
+  className="MoneyInput"
+  onBlur={[Function]}
+  onChange={[Function]}
+  onFocus={[Function]}
+  onKeyDown={[Function]}
+  onMouseUp={[Function]}
+  placeholder="0.00"
+  type="tel"
+  value=""
+/>
+`;
+
+exports[`MoneyInput snapshot renders 1`] = `
+<NumberFormat
+  allowEmptyFormatting={false}
+  allowLeadingZeros={false}
+  allowNegative={false}
+  className="MoneyInput"
+  decimalScale={2}
+  decimalSeparator="."
+  displayType="input"
+  fixedDecimalScale={false}
+  isAllowed={[Function]}
+  isNumericString={false}
+  onBlur={[Function]}
+  onChange={[Function]}
+  onFocus={[Function]}
+  onKeyDown={[Function]}
+  onMouseUp={[Function]}
+  onValueChange={[Function]}
+  placeholder="0.00"
+  prefix="+ "
+  suffix=""
+  thousandsGroupStyle="thousand"
+  type="tel"
+  value={200}
+/>
+`;
