@@ -6,11 +6,11 @@ import { Wallet, Currency } from "../../types";
 import { WalletPicker, WalletType, DirectionType } from "../WalletPicker/WalletPicker";
 import { Button } from '../Button/Button';
 import { ExchangeSubmit } from "../../store/wallets/actions";
-import { formatNumber } from "../../utils";
+import { formatNumber, poorDeepEqual } from "../../utils";
 
 import './App.scss';
 
-interface AppProps {
+export interface AppProps {
     rates: Record<Currency, number>,
     wallets: Wallet[];
     fetchWallets: () => void;
@@ -28,13 +28,13 @@ interface AppAmounts {
     amountTo?: number;
 }
 
-class AppPresenter extends React.Component<AppProps, AppState> {
+export class AppPresenter extends React.Component<AppProps, AppState> {
     constructor(props: AppProps) {
         super(props);
 
         this.state = {
             walletFromIndex: 0,
-            walletToIndex: 1,
+            walletToIndex: 1
         };
     }
 
@@ -63,10 +63,15 @@ class AppPresenter extends React.Component<AppProps, AppState> {
     }
 
     componentDidUpdate(prevProps: AppProps) {
-        // deepEqual
-        if (prevProps.rates !== this.props.rates) {
+        if (!poorDeepEqual(prevProps.rates, this.props.rates)) {
+            const { amountFrom, amountTo } = this.state;
             this.setState({
-                ...this.recalculateMoney('from', this.state.amountFrom)
+                ...this.recalculateMoney('from', amountFrom)
+            });
+        } else if (!poorDeepEqual(prevProps.wallets, this.props.wallets)) {
+            this.setState({
+                amountFrom: 0,
+                amountTo: 0,
             });
         }
     }

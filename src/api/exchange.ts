@@ -13,12 +13,13 @@ const Money = {
 // mock backend calculations
 const calculateExchange = (wallets: Wallet[], data: ExchangeSubmit): Wallet[] => {
     return wallets.map(wallet => {
+        const _wallet = { ...wallet };
         if (wallet.id === data.walletFromId) {
-            wallet.amount = Money.sub(wallet.amount, data.amount);
+            _wallet.amount = Money.sub(wallet.amount, data.amount);
         }
         if (wallet.id === data.walletToId) {
-            wallet.amount = Money.sum(wallet.amount, formatNumber(data.amount * data.rate));
+            _wallet.amount = Money.sum(wallet.amount, formatNumber(data.amount * data.rate));
         }
-        return wallet;
+        return _wallet;
     });
 };

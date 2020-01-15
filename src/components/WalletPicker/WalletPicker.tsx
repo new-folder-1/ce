@@ -2,12 +2,12 @@ import * as React from 'react';
 
 import { Wallet, Currency } from '../../types';
 import { Button } from '../Button/Button';
-
-import './WalletPicker.scss';
 import { MoneyInput, MoneyInputProps } from '../MoneyInput/MoneyInput';
 import { Money } from '../Money/Money';
 
-interface WalletPickerProps {
+import './WalletPicker.scss';
+
+export interface WalletPickerProps {
     type: WalletType;
 
     prev: Wallet;

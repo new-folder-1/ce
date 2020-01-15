@@ -10,12 +10,15 @@ export interface MoneyInputProps {
     onChange: (value: number) => void;
 }
 
-export const MoneyInput = React.memo(({
+export const MoneyInput =({
     prefix, amount, autofocus, onChange
 } : MoneyInputProps) => {
     const onNumberInput = React.useCallback((value: NumberFormatValues) => {
-        onChange(Math.abs(value.floatValue));
-    }, [onChange]);
+        const newValue = Math.abs(value.floatValue);
+        if (newValue === amount) {
+            return;
+        }
+    }, [onChange, amount]);
 
     return (
         <NumberFormat
@@ -30,5 +33,5 @@ export const MoneyInput = React.memo(({
             autoFocus={autofocus}
             type="tel"
         />
-    )
-});
+    );
+};
