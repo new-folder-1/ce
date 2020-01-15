@@ -11,7 +11,8 @@ export const Money = React.memo(({ amount, currency }: MoneyProps) => (
     <span>
         {amount.toLocaleString('en', {
             style: 'currency',
-            currency: currency
+            currency: currency,
+            maximumFractionDigits: 5
         })}
     </span>
 ));

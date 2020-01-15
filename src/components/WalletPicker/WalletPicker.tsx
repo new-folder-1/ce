@@ -44,7 +44,7 @@ export const WalletPicker = ({
     const onPrevClick = React.useCallback(() => onWalletChange('prev'), [onWalletChange]);
     const onNextClick = React.useCallback(() => onWalletChange('next'), [onWalletChange]);
 
-    const prefix: MoneyInputProps['prefix'] = amount === 0 ? '' : type === 'from' ? '-' : '+';
+    const prefix: MoneyInputProps['prefix'] = type === 'from' ? '-' : '+';
 
     return (
         <section className="WalletPicker">

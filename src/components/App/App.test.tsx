@@ -5,9 +5,11 @@ import { AppPresenter as App, AppProps } from './App';
 
 const baseProps: AppProps = {
     rates: {
-        'EUR': 0.8992,
-        'USD': 1,
-        'GBP': 0.7654
+        'USD': {
+            'EUR': 0.8992,
+            'USD': 1,
+            'GBP': 0.7654
+        }
     },
     wallets: [
         {

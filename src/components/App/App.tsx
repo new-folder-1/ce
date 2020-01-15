@@ -2,7 +2,7 @@ import * as React from "react";
 import { boundMethod } from 'autobind-decorator';
 
 import { appConnector } from "./connectors";
-import { Wallet, Currency } from "../../types";
+import { Wallet, Currency, ExchangeRates } from "../../types";
 import { WalletPicker, WalletType, DirectionType } from "../WalletPicker/WalletPicker";
 import { Button } from '../Button/Button';
 import { ExchangeSubmit } from "../../store/wallets/actions";
@@ -11,7 +11,7 @@ import { formatNumber, poorDeepEqual } from "../../utils";
 import './App.scss';
 
 export interface AppProps {
-    rates: Record<Currency, number>,
+    rates: ExchangeRates,
     wallets: Wallet[];
     fetchWallets: () => void;
     updateBaseCurrency: (currency: Currency) => void;
@@ -21,6 +21,8 @@ export interface AppProps {
 type AppState = {
     walletFromIndex: number;
     walletToIndex: number;
+
+    lastTouchedWallet: WalletType;
 } & AppAmounts
 
 interface AppAmounts {
@@ -34,7 +36,9 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
 
         this.state = {
             walletFromIndex: 0,
-            walletToIndex: 1
+            walletToIndex: 1,
+
+            lastTouchedWallet: 'from',
         };
     }
 
@@ -46,10 +50,10 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
     }
     get rateFrom(): number | null {
         const { props: { rates }, walletFrom, walletTo} = this;
-        if (!rates || !walletFrom || !walletTo) {
+        if (!rates || !rates[walletFrom.currency] || !walletFrom || !walletTo) {
             return null;
         }
-        return rates[walletTo.currency];
+        return rates[walletFrom.currency][walletTo.currency];
     }
     get rateTo(): number | null {
         if (!this.rateFrom) {
@@ -64,15 +68,11 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
 
     componentDidUpdate(prevProps: AppProps) {
         if (!poorDeepEqual(prevProps.rates, this.props.rates)) {
-            const { amountFrom, amountTo } = this.state;
             this.setState({
-                ...this.recalculateMoney('from', amountFrom)
+                ...this.recalculateForLastTouchedWallet()
             });
         } else if (!poorDeepEqual(prevProps.wallets, this.props.wallets)) {
-            this.setState({
-                amountFrom: 0,
-                amountTo: 0,
-            });
+            this.setState({ amountFrom: 0, amountTo: 0 });
         }
     }
     
@@ -153,20 +153,30 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
         return { amountFrom, amountTo };
     }
 
+    recalculateForLastTouchedWallet() {
+        const { lastTouchedWallet, amountFrom, amountTo } = this.state;
+        return this.recalculateMoney(
+            lastTouchedWallet,
+            lastTouchedWallet === 'from' ? amountFrom : amountTo
+        );
+    }
+
     @boundMethod
     onAmountChange(type: WalletType, value: number) {
         this.setState({
-            ...this.recalculateMoney(type, value)
+            ...this.recalculateMoney(type, value),
+            lastTouchedWallet: type,
         });
     }
 
     @boundMethod
     onWalletFromChange(direction: DirectionType) {
+        
         this.setState({
             walletFromIndex: this.getNewWalletIndex('from', direction)
         }, () => {
             this.setState({
-                ...this.recalculateMoney('from', this.state.amountFrom)
+                ...this.recalculateForLastTouchedWallet()
             });
             this.props.updateBaseCurrency(this.walletFrom.currency);
         });
@@ -178,7 +188,7 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
             walletToIndex: this.getNewWalletIndex('to', direction)
         }, () => {
             this.setState({
-                ...this.recalculateMoney('to', this.state.amountTo)
+                ...this.recalculateForLastTouchedWallet()
             });
         });
     }

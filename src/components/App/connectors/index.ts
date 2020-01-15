@@ -5,12 +5,12 @@ import { RootState } from "../../../store";
 import { getWallets } from "../../../store/wallets/selectors";
 import { updateBaseCurrency } from "../../../store/rates/actions";
 import { Currency } from "../../../types";
-import { getRatesForCurrentBase } from "../../../store/rates/selectors";
+import { getRates } from "../../../store/rates/selectors";
 
 const mapStateToProps = (state: RootState) => {
     return {
         wallets: getWallets(state),
-        rates: getRatesForCurrentBase(state),
+        rates: getRates(state),
     };
 };
 
