@@ -1,21 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MoneyInput adds prefix when input changes 1`] = `
-<input
-  className="MoneyInput"
-  onChange={[Function]}
-  placeholder="0.00"
-  type="tel"
-  value=""
-/>
-`;
-
 exports[`MoneyInput snapshot renders 1`] = `
-<input
-  className="MoneyInput"
-  onChange={[Function]}
-  placeholder="0.00"
-  type="tel"
-  value="200"
-/>
+<MoneyInput
+  amount={200}
+  autofocus={true}
+  disabled={true}
+  onChange={[MockFunction]}
+  prefix="+"
+>
+  <input
+    autoFocus={true}
+    className="MoneyInput"
+    disabled={true}
+    onChange={[Function]}
+    placeholder="0.00"
+    type="tel"
+    value="+ 200"
+  />
+</MoneyInput>
 `;

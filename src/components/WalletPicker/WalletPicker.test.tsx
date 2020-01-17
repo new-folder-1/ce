@@ -26,7 +26,8 @@ const baseProps: WalletPickerProps = {
     onAmountChange: jest.fn(),
     rate: 0.8992,
     exchangeCurrency: 'USD',
-    amount: 20.50
+    amount: 20.50,
+    amountDisabled: true
 };
 
 describe('WalletPicker', () => {

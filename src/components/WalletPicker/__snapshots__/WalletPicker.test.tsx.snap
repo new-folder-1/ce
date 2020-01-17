@@ -12,9 +12,10 @@ exports[`WalletPicker next is not rendered 1`] = `
     >
       GBP
     </header>
-    <Component
+    <MoneyInput
       amount={20.5}
       autofocus={true}
+      disabled={true}
       onChange={[Function]}
       prefix="-"
     />
@@ -71,9 +72,10 @@ exports[`WalletPicker prev is not rendered 1`] = `
     >
       GBP
     </header>
-    <Component
+    <MoneyInput
       amount={20.5}
       autofocus={true}
+      disabled={true}
       onChange={[Function]}
       prefix="-"
     />
@@ -130,9 +132,10 @@ exports[`WalletPicker snapshot renders 1`] = `
     >
       GBP
     </header>
-    <Component
+    <MoneyInput
       amount={20.5}
       autofocus={true}
+      disabled={true}
       onChange={[Function]}
       prefix="-"
     />
