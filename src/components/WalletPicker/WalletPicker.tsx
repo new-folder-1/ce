@@ -19,6 +19,7 @@ export interface WalletPickerProps {
     rate: number;
     exchangeCurrency: Currency;
 
+    amountDisabled?: boolean;
     onAmountChange: (type: WalletType, value: number) => void;
     onWalletChange: (direction: DirectionType) => void;
 }
@@ -35,7 +36,8 @@ export const WalletPicker = ({
     next,
     rate,
     exchangeCurrency,
-    amount
+    amount,
+    amountDisabled
 }: WalletPickerProps) => {
     const onMoneyInputChange = React.useCallback((value: number) => {
         onAmountChange(type, value);
@@ -57,6 +59,7 @@ export const WalletPicker = ({
                     prefix={prefix}
                     autofocus={type === 'from'}
                     onChange={onMoneyInputChange}
+                    disabled={amountDisabled}
                 />
             </div>
             <div className="WalletPicker-Row">

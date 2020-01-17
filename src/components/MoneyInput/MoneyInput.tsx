@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { boundMethod } from 'autobind-decorator';
 
 import { isValidNumber, clearLeadingZeros } from '../../utils';
 
@@ -8,51 +9,76 @@ export interface MoneyInputProps {
     prefix: '+' | '-';
     amount?: number;
     autofocus?: boolean;
+    disabled?: boolean;
     onChange: (value: number) => void;
 }
 
-const addPrefix = (string: string, prefix: string) => `${prefix}${string}`;
+interface MoneyInputState {
+    rawValue: string;
+    value: number;
+}
 
-export const MoneyInput =({
-    prefix, amount, autofocus, onChange
-} : MoneyInputProps) => {
-    const [rawValue, setRawValue] = React.useState(amount ? amount.toString() : '');
-    const [value, setValue] = React.useState(amount);
+export class MoneyInput extends React.Component<MoneyInputProps, MoneyInputState> {
+    state: MoneyInputState = {
+        rawValue: this.formatRawValue(this.props.amount),
+        value: this.props.amount
+    }
 
-    const _prefix = prefix + ' ';
+    componentDidUpdate() {
+        const { amount } = this.props;
+        if (amount !== this.state.value) {
+            this.setState({
+                value: amount,
+                rawValue: this.formatRawValue(amount)
+            });
+        }
+    }
 
-    React.useEffect(() => {
-        if (amount === value) return;
+    formatRawValue(value: number, preFormattedString?: string) {
+        const formatted = preFormattedString || (value ? value.toString() : '');
+        return value ? `${this.prefix}${formatted}` : formatted;
+    }
 
-        setValue(amount);
-        const amountString = amount ? amount.toString() : '';
-        setRawValue(amount ? addPrefix(amountString, _prefix) : amountString);
-    }, [amount, value]);
+    get prefix() {
+        return this.props.prefix + ' ';
+    }
 
-    const onInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputVal = e.currentTarget.value;        
-        let clearInputVal = inputVal.startsWith(_prefix) ? inputVal.substring(_prefix.length) : inputVal;
+    @boundMethod
+    onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const inputVal = e.target.value;
+        let clearInputVal = inputVal.startsWith(this.prefix) ? inputVal.substring(this.prefix.length) : inputVal;
 
         if (!isValidNumber(clearInputVal)) {
             return;
         }
-
         clearInputVal = clearLeadingZeros(clearInputVal);
+        if (clearInputVal.startsWith('.')) {
+            clearInputVal = '0' + clearInputVal;
+        }
         const num = Number(clearInputVal);
-        setValue(num);
-        setRawValue(num === 0 ? clearInputVal : addPrefix(clearInputVal, _prefix));
 
-        onChange(num);
+        this.setState({
+            value: num,
+            rawValue: this.formatRawValue(num, clearInputVal)
+        }, num !== this.state.value ? () => {
+            this.props.onChange(this.state.value);
+        } : undefined);
     };
 
-    return (
-        <input
-            className="MoneyInput"
-            value={rawValue}
-            onChange={onInput}
-            autoFocus={autofocus}
-            placeholder="0.00"
-            type="tel"
-        />
-    );
-};
+    
+    render() {
+        const { autofocus, disabled } = this.props;
+        return (
+            <input
+                className="MoneyInput"
+                disabled={disabled}
+                value={this.state.rawValue}
+                onChange={this.onInputChange}
+                autoFocus={autofocus}
+                placeholder="0.00"
+                type="tel"
+            />
+        );
+    }
+}
+

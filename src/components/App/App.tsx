@@ -75,7 +75,7 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
             this.setState({ amountFrom: 0, amountTo: 0 });
         }
     }
-    
+
     render() {
         const { wallets } = this.props;
         const { walletFromIndex, walletToIndex, amountFrom, amountTo } = this.state;
@@ -112,6 +112,7 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
                         rate={rateFrom}
                         exchangeCurrency={walletTo.currency}
                         amount={amountFrom}
+                        amountDisabled={this.isAmountInputDisabled()}
                     />
                 </div>
                 <div className="App-Wallet App-Wallet_to">
@@ -127,6 +128,7 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
                         rate={rateTo}
                         exchangeCurrency={walletFrom.currency}
                         amount={amountTo}
+                        amountDisabled={this.isAmountInputDisabled()}
                     />
                 </div>
             </div>
@@ -171,7 +173,6 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
 
     @boundMethod
     onWalletFromChange(direction: DirectionType) {
-        
         this.setState({
             walletFromIndex: this.getNewWalletIndex('from', direction)
         }, () => {
@@ -200,9 +201,13 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
 
     isSubmitDisabled() {
         const { amountFrom } = this.state;
-        return this.walletFrom.id === this.walletTo.id ||
+        return this.isAmountInputDisabled() ||
             !amountFrom || amountFrom > this.walletFrom.amount ||
             amountFrom < 1;
+    }
+
+    isAmountInputDisabled() {
+        return this.walletFrom.id === this.walletTo.id;
     }
 
     @boundMethod
