@@ -4,6 +4,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { AppPresenter as App, AppProps } from './App';
 import { Button } from '../Button/Button';
 import { WalletPicker } from '../WalletPicker/WalletPicker';
+import { ErrorMessage } from '../ErrorMessage/ErrorMessage';
 
 const r1 = 0.8992;
 const r2 = 0.765404;
@@ -290,5 +291,15 @@ describe('App', () => {
 
             expect(component.state('amountFrom')).toEqual(100);
         });
+    });
+
+    it('renders with global error', () => {
+        const component = getApp({
+            globalError: {
+                name: '',
+                message: 'Failed to fetch wallets'
+            }
+        });
+        expect(component.find(ErrorMessage)).toHaveLength(1);
     });
 });

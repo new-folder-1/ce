@@ -6,6 +6,7 @@ import { ExchangeRates, Currency } from "../../types";
 export interface RatesState {
     base: Currency;
     rates?: ExchangeRates;
+    error?: Error;
 }
 
 const initialState = {
@@ -21,7 +22,14 @@ export const ratesReducer = createReducer<RatesState, RatesActions>(initialState
             rates: {
                 ...state.rates,
                 ...action.payload
-            }
+            },
+            error: undefined
+        };
+    })
+    .handleAction(ratesActions.fetchRates.failure, (state, action) => {
+        return {
+            ...state,
+            error: action.payload
         };
     })
     .handleAction(ratesActions.updateBaseCurrency, (state, action) => {

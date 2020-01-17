@@ -2,15 +2,17 @@ import { Dispatch } from "redux";
 import { fetchWalletsAsync, submitExchangeAsync, ExchangeSubmit } from "../../../store/wallets/actions";
 import { connect } from "react-redux";
 import { RootState } from "../../../store";
-import { getWallets } from "../../../store/wallets/selectors";
+import { getWallets, getFetchError as walletsError, getExchangeError } from "../../../store/wallets/selectors";
 import { updateBaseCurrency } from "../../../store/rates/actions";
 import { Currency } from "../../../types";
-import { getRates } from "../../../store/rates/selectors";
+import { getRates, getRateError as ratesError } from "../../../store/rates/selectors";
 
 const mapStateToProps = (state: RootState) => {
     return {
         wallets: getWallets(state),
         rates: getRates(state),
+        globalError: walletsError(state) || ratesError(state),
+        exchangeError: getExchangeError(state)
     };
 };
 

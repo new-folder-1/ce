@@ -4,11 +4,13 @@ import { Wallet } from '../../types';
 import * as walletsActions from './actions';
 
 export interface WalletState {
-    items: Wallet[]
+    items: Wallet[],
+    fetchError?: Error,
+    exchangeError?: Error,
 }
 
 const initialState: WalletState = {
-    items: []
+    items: [],
 };
 
 type WalletsAction = ActionType<typeof walletsActions>;
@@ -20,6 +22,20 @@ export const walletsReducer = createReducer<WalletState, WalletsAction>(initialS
     ], (state, action) => {
         return {
             ...state,
-            items: action.payload
+            items: action.payload || [],
+            fetchError: undefined,
+            exchangeError: undefined
+        };
+    })
+    .handleAction(walletsActions.fetchWalletsAsync.failure, (state, action) => {
+        return {
+            ...state,
+            fetchError: action.payload
+        };
+    })
+    .handleAction(walletsActions.submitExchangeAsync.failure, (state, action) => {
+        return {
+            ...state,
+            exchangeError: action.payload
         };
     });

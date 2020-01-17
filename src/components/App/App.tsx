@@ -7,6 +7,7 @@ import { WalletPicker, WalletType, DirectionType } from "../WalletPicker/WalletP
 import { Button } from '../Button/Button';
 import { ExchangeSubmit } from "../../store/wallets/actions";
 import { formatNumber, poorDeepEqual } from "../../utils";
+import { ErrorMessage } from "../ErrorMessage/ErrorMessage";
 
 import './App.scss';
 
@@ -16,6 +17,9 @@ export interface AppProps {
     fetchWallets: () => void;
     updateBaseCurrency: (currency: Currency) => void;
     submitExchange: (data: ExchangeSubmit) => void;
+
+    globalError?: Error;
+    exchangeError?: Error;
 }
 
 type AppState = {
@@ -77,12 +81,19 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
     }
 
     render() {
+        if (this.props.globalError) {
+            return (
+                <div className="App">
+                    <ErrorMessage message={this.props.globalError.message} />
+                </div>
+            );
+        }
         const { wallets } = this.props;
         const { walletFromIndex, walletToIndex, amountFrom, amountTo } = this.state;
         const { walletFrom, walletTo, rateFrom, rateTo } = this;
 
         if (wallets.length === 0) {
-            return <span>Wallets were not found</span>;
+            return <span>Wallets were not loaded</span>;
         }
 
         if (!rateFrom) {
@@ -92,6 +103,7 @@ export class AppPresenter extends React.Component<AppProps, AppState> {
         return (
             <div className="App">
                 <div className="App-Header">
+                    <span>{this.props.exchangeError && <ErrorMessage message={this.props.exchangeError.message} />}</span>
                     <Button
                         text="Exchange"
                         onClick={this.submitExchange}

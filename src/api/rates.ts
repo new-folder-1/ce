@@ -5,7 +5,6 @@ interface RatesResponse {
     rates: Record<Currency, number>
 }
 
-//
 const OPENEXCHANGE_APP_ID = 'b15747ffa53d439e913dc56a5e8c8fb0';
 const SYMBOLS = ['USD', 'EUR', 'GBP'].join(',');
 

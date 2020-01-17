@@ -4,12 +4,15 @@ import { Provider } from 'react-redux';
 
 import { App } from './components/App/App';
 import { store } from "./store";
+import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
 
 import './assets/styles/normalize.css';
 
 ReactDOM.render(
     <Provider store={store}>
-        <App />
+        <ErrorBoundary>
+            <App />
+        </ErrorBoundary>
     </Provider>,
     document.getElementById('app')
 );
