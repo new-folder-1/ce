@@ -26,7 +26,7 @@
 		"enzyme-to-json": "^3.4.3",
 		"html-webpack-plugin": "^3.2.0",
 		"jest": "^24.9.0",
-		"node-sass": "^4.13.0",
+		"node-sass": "^4.13.1",
 		"react-hot-loader": "^4.12.18",
 		"sass-loader": "^8.0.0",
 		"style-loader": "^1.1.2",
